@@ -1,0 +1,15 @@
+# This is a TOML document.
+
+title = "fake sql"
+
+[xorm]
+user = "root"
+passwd = "root"
+database = "test"
+securePivFile = "C:/ProgramData/MySQL/MySQL Server 5.7/Uploads"
+# secure_piv_file = "C:/ProgramData/MySQL/MySQL Server 5.7/Uploads"
+
+[gorm]
+mysql = "root:root@/test?charset=utf8mb4&parseTime=True&loc=Local"
+securePivFile = "C:/ProgramData/MySQL/MySQL Server 5.7/Uploads"
+# secure_piv_file = "C:/ProgramData/MySQL/MySQL Server 5.7/Uploads"
