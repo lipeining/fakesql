@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"xorm.io/xorm"
-	"github.com/jinzhu/gorm"
 )
 
 // Xorm a pointer to xorm.Engine
@@ -26,14 +25,14 @@ func NewXorm(user, passwd, database, securePivFile string) {
 	Xorm.ShowSQL(true)
 }
 
-// Gorm a pointer to gorm.DB
-var Gorm  *gorm.DB
-// NewGorm init global DB
-func NewGorm(mysql string) {
-	var err error
-	Gorm, err := gorm.Open("mysql", mysql)
-	if err != nil {
-		fmt.Println(err)
-	}
-	Gorm.LogMode(true)
-}
+// // Gorm a pointer to gorm.DB
+// var Gorm  *gorm.DB
+// // NewGorm init global DB
+// func NewGorm(mysql string) {
+// 	var err error
+// 	Gorm, err := gorm.Open("mysql", mysql)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// 	Gorm.LogMode(true)
+// }

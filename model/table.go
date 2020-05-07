@@ -7,7 +7,7 @@ type TblTmpID struct {
 
 // Column 输入列属性
 type Column struct {
-	Name string
-	T    string
-	Def  string
+	Name string `json:"name"`
+	T    string `json:"t"`
+	Def  string `json:"def"`
 }

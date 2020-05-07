@@ -72,6 +72,7 @@ func init() {
 		// 	panic(fmt.Errorf("unable to decode into struct, %v", err))
 		// }
 		// 可以考虑加锁操作
+		// 对于数据库的链接，就算可以重载 config.toml 也需要重新初始化 database.Xorm 链接
 		var newConfig tomlConfig
 		err = viper.Unmarshal(&newConfig)
 		if err != nil {

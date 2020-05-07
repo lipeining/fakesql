@@ -77,3 +77,31 @@ func TestCreateTable(t *testing.T) {
 	err = CreateTable(tblName, num, cols)
 	assert.Equal(t, nil, err)
 }
+func TestCreateTableAndInsertSQL(t *testing.T) {
+	setup()
+	cols := []model.Column{
+		model.Column{Name: "id", T: "id",},
+		model.Column{Name: "city", T: "string",},
+		model.Column{Name: "province", T: "string",},
+		model.Column{Name: "create_time", T: "datetime",},
+	}
+	tblName := "fork"
+	num := 10000
+	err := CreateTableAndInsertSQL(tblName, num, cols)
+	assert.Equal(t, nil, err)
+}
+func TestCreateTableAndInsertSQLFile(t *testing.T) {
+	setup()
+	cols := []model.Column{
+		model.Column{Name: "id", T: "id",},
+		model.Column{Name: "city", T: "string",},
+		model.Column{Name: "province", T: "string",},
+		model.Column{Name: "create_time", T: "datetime",},
+	}
+	tblName := "pen"
+	num := 100000
+	err := CreateTableAndInsertSQLFile(tblName, num, cols)
+	assert.Equal(t, nil, err)
+	// err = SourceSQL(tblName, num)
+	// assert.Equal(t, nil, err)
+}

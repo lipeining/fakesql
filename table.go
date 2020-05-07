@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -283,6 +285,7 @@ func MakeColumnFuncFactory(cols []model.Column) func(int) []string {
 		insertCols := make([]string, 0)
 		for _, column := range cols {
 			if column.T == "string" {
+				// 使用 Word 会出新 let's 这种数据，需要格外小心
 				insertCols = append(insertCols, gofakeit.Word())
 			} else if column.T == "datetime" {
 				d := gofakeit.Date().Format("2006-01-02 15:04:05")
@@ -336,5 +339,220 @@ func Writetxt(tblName string, num int, makeColumn func(int) []string ) error {
 		}
 		outputWriter.Flush()
 	}
+	return nil
+}
+// ParseJSONColumn 通过 json 文件来解析 column
+func ParseJSONColumn(filePath string) ([]model.Column, error) {
+	content, err := ioutil.ReadFile(filePath)
+	var cols []model.Column
+	if err != nil {
+		fmt.Println("read file error:", err)
+		return nil, err
+	}
+	err = json.Unmarshal(content, &cols)
+	if err != nil {
+		fmt.Println("unmarshal error:", err)
+		return nil, err
+	}
+	fmt.Println(filePath, " cols length: ", len(cols))
+	return cols, nil
+}
+
+
+// 使用  insert into values bulck create 的方式进行操作
+
+// CreateTableAndInsertSQL 创建表格
+func CreateTableAndInsertSQL(tblName string, num int, cols []model.Column) error {
+	fullTblName := config.Config.Xorm.Database + "." + tblName
+	insertCols := make([]string, 0);
+	ctb := sqlbuilder.NewCreateTableBuilder()
+	ctb.CreateTable(fullTblName).IfNotExists()
+	// ib := sqlbuilder.NewInsertBuilder()
+	// ib.InsertInto(fullTblName)
+	// todo 需要检查正确性
+	// todo 丰富的 column 属性 默认值，大小，
+	colNames := make([]string, 0)
+	insertSQL := "insert into " + fullTblName;
+	for _, column := range cols {
+		name := column.Name
+		colNames = append(colNames, name)
+		insertCols = append(insertCols, "`" + name + "`")
+		if column.T == "string" {			
+			ctb.Define(name, "VARCHAR(255)", "NOT NULL", `COMMENT "`+name+`"`)
+		} else if column.T == "datetime" {			
+			ctb.Define(name, "datetime", "NOT NULL", `COMMENT "`+name+`"`)
+		} else if column.T == "int64" {			
+			ctb.Define(name, "BIGINT(20)", "NOT NULL", `COMMENT "`+name+`"`)
+		} else if column.T == "int32" {
+			ctb.Define(name, "INT(11)", "NOT NULL", `COMMENT "`+name+`"`)
+		} else if column.T == "id" {			
+			ctb.Define("id", "BIGINT(20)", "NOT NULL", "PRIMARY KEY", "AUTO_INCREMENT", `COMMENT "id"`)
+		}
+	}
+	ctb.Option("DEFAULT CHARACTER SET", "utf8mb4")
+	fmt.Println(ctb)
+	createTableCommand := ctb.String()
+	// load data command 暂时不处理 set 操作
+	results, err := database.Xorm.Query(createTableCommand)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("create table results", results)
+	makeColumn := MakeColumnFuncFactory(cols)
+	every := 10000
+	total := num / every
+	if num%every != 0 {
+		total++
+	}
+	current := 0
+	insertSQL += " (" + strings.Join(colNames, ",") + ") ";
+	lines := make([]string, 0)
+	for i := 0; i < total; i++ {
+		for j := 0; j < every; j++ {
+			current++
+			values := makeColumn(current)
+			line := " ("
+			for index, val := range values {
+				line += "\""+ val + "\""
+				if index != len(values)-1 {
+					line += ","
+				}
+			}
+			line += ") "
+			lines = append(lines, line)
+		}
+	}
+	insertSQL += " values " + strings.Join(lines, ",") + ";"
+	// fmt.Println(insertSQL[:200])
+	results, err = database.Xorm.Query(insertSQL)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("insert results", results)
+	// ib.Cols("id", "name", "status", "created_at")
+	// ib.Cols(colNames...)
+	// ib.Values(1, "Huan Du", 1, Raw("UNIX_TIMESTAMP(NOW())"))
+	// ib.Values(2, "Charmy Liu", 1, 1234567890)
+	// for i := 0; i < total; i++ {
+	// 	for j := 0; j < every; j++ {
+	// 		current++
+	// 		line := makeColumn(current)
+	// 		values := make([]interface{}, 0)
+	// 		for _, val := range line {
+	// 			var convert interface{} = val
+	// 			values = append(values, convert)
+	// 		}
+	// 		ib.Values(values...)
+	// 	}
+	// }
+	// sql, args := ib.Build()
+	return nil
+}
+// CreateTableAndInsertSQLFile 创建表格
+func CreateTableAndInsertSQLFile(tblName string, num int, cols []model.Column) error {
+	fileName :=  tblName + "_" + strconv.Itoa(num) + ".sql"
+	filePath := filepath.Join(config.Config.Xorm.SecurePivFile, fileName)
+	exists, err := PathExists(filePath)
+	if err != nil {
+		fmt.Println("An error stat with file \n", filePath, err)
+		return err
+	}
+	if exists {
+		return nil
+	}
+	outputFile, outputError := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
+	if outputError != nil {
+		fmt.Println("An error occurred with file opening or creation\n", filePath, outputError)
+		return outputError
+	}
+	defer outputFile.Close()
+
+	fullTblName := config.Config.Xorm.Database + "." + tblName
+	insertCols := make([]string, 0);
+	ctb := sqlbuilder.NewCreateTableBuilder()
+	ctb.CreateTable(fullTblName).IfNotExists()
+	// todo 需要检查正确性
+	// todo 丰富的 column 属性 默认值，大小，
+	colNames := make([]string, 0)
+	insertSQL := "insert into " + fullTblName;
+	for _, column := range cols {
+		name := column.Name
+		colNames = append(colNames, name)
+		insertCols = append(insertCols, "`" + name + "`")
+		if column.T == "string" {			
+			ctb.Define(name, "VARCHAR(255)", "NOT NULL", `COMMENT "`+name+`"`)
+		} else if column.T == "datetime" {			
+			ctb.Define(name, "datetime", "NOT NULL", `COMMENT "`+name+`"`)
+		} else if column.T == "int64" {			
+			ctb.Define(name, "BIGINT(20)", "NOT NULL", `COMMENT "`+name+`"`)
+		} else if column.T == "int32" {
+			ctb.Define(name, "INT(11)", "NOT NULL", `COMMENT "`+name+`"`)
+		} else if column.T == "id" {			
+			ctb.Define("id", "BIGINT(20)", "NOT NULL", "PRIMARY KEY", "AUTO_INCREMENT", `COMMENT "id"`)
+		}
+	}
+	ctb.Option("DEFAULT CHARACTER SET", "utf8mb4")
+	fmt.Println(ctb)
+	createTableCommand := ctb.String()
+	outputWriter := bufio.NewWriter(outputFile)
+	outputWriter.WriteString(createTableCommand + "\n")
+	outputWriter.Flush()
+	// results, err := database.Xorm.Query(createTableCommand)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return err
+	// }
+	// fmt.Println("create table results", results)
+	makeColumn := MakeColumnFuncFactory(cols)
+	every := 10000
+	total := num / every
+	if num%every != 0 {
+		total++
+	}
+	current := 0
+	for i := 0; i < total; i++ {
+		lines := make([]string, 0)
+		everySQL :=  insertSQL + " (" + strings.Join(colNames, ",") + ") ";
+		for j := 0; j < every; j++ {
+			current++
+			values := makeColumn(current)
+			line := " ("
+			for index, val := range values {
+				line += "\""+ val + "\""
+				if index != len(values)-1 {
+					line += ","
+				}
+			}
+			line += ") "
+			lines = append(lines, line)
+		}
+		everySQL += " values " + strings.Join(lines, ",") + ";"
+		outputWriter.WriteString("\n" + everySQL)
+		outputWriter.Flush()
+	}
+	return nil
+}
+// SourceSQL use source to load rows into table
+func SourceSQL(tblName string, num int) error {
+	fileName :=  tblName + "_" + strconv.Itoa(num) + ".sql"
+	filePath := config.Config.Xorm.SecurePivFile + "/" + fileName
+	exists, err := PathExists(filePath)
+	if err != nil {
+		fmt.Println("An error stat with file \n", filePath, err)
+		return err
+	}
+	if !exists {
+		return nil
+	}
+	sourceCommand := "source " + "'" + filePath + "'"
+	// 暂时无法执行该语句。
+	results, err := database.Xorm.Query(sourceCommand)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("source results", results)
 	return nil
 }
