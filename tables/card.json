@@ -1,0 +1,14 @@
+[
+    {
+        "name": "id", "t": "id", "def": ""
+    },
+    {
+        "name": "name", "t": "string", "def": ""
+    },
+    {
+        "name": "card", "t": "string", "def": ""
+    },
+    {
+        "name": "create_time", "t": "datetime", "def": ""
+    }
+]

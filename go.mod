@@ -6,6 +6,7 @@ require (
 	github.com/brianvoe/gofakeit/v5 v5.4.3
 	github.com/denisenkom/go-mssqldb v0.0.0-20191124224453-732737034ffd // indirect
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/huandu/go-sqlbuilder v1.7.0
 	github.com/lib/pq v1.1.1 // indirect

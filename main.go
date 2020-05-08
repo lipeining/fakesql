@@ -24,30 +24,28 @@ func init() {
 func main() {
 	fmt.Println(config.Config)
 	database.NewXorm(config.Config.Xorm.User, config.Config.Xorm.Passwd, config.Config.Xorm.Database, config.Config.Xorm.SecurePivFile)
+	r := setupRouter()
+	r.Run(":8000")
 	flag.Parse()
-	if tblName == "" {
-		fmt.Println("missed tblName")
-		return
-	}
-	if jsonPath == "" {
-		fmt.Println("missed jsonPath")
-		return
-	}
-	fmt.Println(tblName, num, jsonPath)
-	cols, err := ParseJSONColumn(jsonPath)
-	if err != nil {
-		fmt.Println("parse json file error ", err)
-		return
-	}
-	makeColumn := MakeColumnFuncFactory(cols)
-	err = Writetxt(tblName, num, makeColumn)
-	if err != nil {
-		fmt.Println("wrtite txt file error ", err)
-		return
-	}
-	err = CreateTable(tblName, num, cols)
-	if err != nil {
-		fmt.Println("create table error ", err)
-		return
+	if tblName == "" || jsonPath == "" {
+		fmt.Println("missed tblName || jsonPath")
+	} else {
+		fmt.Println(tblName, num, jsonPath)
+		cols, err := ParseJSONColumn(jsonPath)
+		if err != nil {
+			fmt.Println("parse json file error ", err)
+			return
+		}
+		makeColumn := MakeColumnFuncFactory(cols)
+		err = Writetxt(tblName, num, makeColumn)
+		if err != nil {
+			fmt.Println("wrtite txt file error ", err)
+			return
+		}
+		err = CreateTable(tblName, num, cols)
+		if err != nil {
+			fmt.Println("create table error ", err)
+			return
+		}
 	}
 }
