@@ -22,6 +22,7 @@ func TestPingRoute(t *testing.T) {
 	assert.Equal(t, "pong", w.Body.String())
 }
 func TestPostTable(t *testing.T) {
+	setup()
 	router := setupRouter()
 
 	// bodyStr := `{ "tblName": "card", "num": 10000, jsonPath: "./tables/card.json" }`
