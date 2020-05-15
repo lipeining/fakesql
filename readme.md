@@ -56,6 +56,15 @@ load table results []
 - 考虑导出 sql 语句的实现方式
 - 测试  insert into values , insert into select 的性能
 
+结合 mysql 的 slow log, explain, sql advisor 等工具，分析 mysql 的 log 日志 bin-log, error-log, normal-log 等，
+可以简单实现测试方案的生成。
+使用 select * from information.schema 等方式提供数据库的样式，
+导出对应的 json 文件。
+支持所有的 table column 定义，null not null, unique, indexing, default value, comment,
+对应上支持 regrex 的数据生成方式，结合 gofakeit 的内容。
+考虑引入已有的 sql advisor 工具的包，生成对应的索引建议，sql改写建议
+SOAR	sqlcheck	pt-query-advisor	SQL Advisor	Inception	sqlautoreview
+
 ### 理论基础
 #### load data
 ```
