@@ -10,6 +10,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/huandu/go-sqlbuilder v1.7.0
 	github.com/lib/pq v1.1.1 // indirect
+	github.com/lipeining/fakecsv v0.0.0-20200519081439-2702088cb14a
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
 	github.com/spf13/viper v1.6.3
 	github.com/stretchr/testify v1.4.0

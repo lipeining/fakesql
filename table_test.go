@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lipeining/fakesql/config"
@@ -10,6 +10,7 @@ import (
 	"github.com/lipeining/fakesql/model"
 	"github.com/stretchr/testify/assert"
 )
+
 func setup() {
 	// fmt.Println(config.Config)
 	database.NewXorm(config.Config.Xorm.User, config.Config.Xorm.Passwd, config.Config.Xorm.Database, config.Config.Xorm.SecurePivFile)
@@ -27,9 +28,9 @@ func TestCreateBaseTable(t *testing.T) {
 	err = LoadIntoBaseTable(num)
 	assert.Equal(t, nil, err)
 	cols := []model.Column{
-		model.Column{Name: "city", T: "string",},
-		model.Column{Name: "province", T: "string",},
-		model.Column{Name: "create_time", T: "datetime",},
+		model.Column{Name: "city", T: "string"},
+		model.Column{Name: "province", T: "string"},
+		model.Column{Name: "create_time", T: "datetime"},
 	}
 	tblName := "car"
 	err = CreateTableByloadFile(tblName, num, cols)
@@ -37,23 +38,23 @@ func TestCreateBaseTable(t *testing.T) {
 }
 func TestMakeColumnFuncFactory(t *testing.T) {
 	cols := []model.Column{
-		model.Column{Name: "id", T: "id",},
-		model.Column{Name: "city", T: "string",},
-		model.Column{Name: "province", T: "string",},
-		model.Column{Name: "create_time", T: "datetime",},
+		model.Column{Name: "id", T: "id"},
+		model.Column{Name: "city", T: "string"},
+		model.Column{Name: "province", T: "string"},
+		model.Column{Name: "create_time", T: "datetime"},
 	}
 	makeColumn := MakeColumnFuncFactory(cols)
 	oneLine := makeColumn(1)
 	fmt.Println(oneLine)
-	assert.Equal(t, true, len(oneLine)>0)
+	assert.Equal(t, true, len(oneLine) > 0)
 }
 func TestWritetxt(t *testing.T) {
 	setup()
 	cols := []model.Column{
-		model.Column{Name: "id", T: "id",},
-		model.Column{Name: "city", T: "string",},
-		model.Column{Name: "province", T: "string",},
-		model.Column{Name: "create_time", T: "datetime",},
+		model.Column{Name: "id", T: "id"},
+		model.Column{Name: "city", T: "string"},
+		model.Column{Name: "province", T: "string"},
+		model.Column{Name: "create_time", T: "datetime"},
 	}
 	makeColumn := MakeColumnFuncFactory(cols)
 	tblName := "computer"
@@ -64,10 +65,10 @@ func TestWritetxt(t *testing.T) {
 func TestCreateTable(t *testing.T) {
 	setup()
 	cols := []model.Column{
-		model.Column{Name: "id", T: "id",},
-		model.Column{Name: "city", T: "string",},
-		model.Column{Name: "province", T: "string",},
-		model.Column{Name: "create_time", T: "datetime",},
+		model.Column{Name: "id", T: "id"},
+		model.Column{Name: "city", T: "string"},
+		model.Column{Name: "province", T: "string"},
+		model.Column{Name: "create_time", T: "datetime"},
 	}
 	makeColumn := MakeColumnFuncFactory(cols)
 	tblName := "book"
@@ -80,10 +81,10 @@ func TestCreateTable(t *testing.T) {
 func TestCreateTableAndInsertSQL(t *testing.T) {
 	setup()
 	cols := []model.Column{
-		model.Column{Name: "id", T: "id",},
-		model.Column{Name: "city", T: "string",},
-		model.Column{Name: "province", T: "string",},
-		model.Column{Name: "create_time", T: "datetime",},
+		model.Column{Name: "id", T: "id"},
+		model.Column{Name: "city", T: "string"},
+		model.Column{Name: "province", T: "string"},
+		model.Column{Name: "create_time", T: "datetime"},
 	}
 	tblName := "fork"
 	num := 10000
@@ -93,10 +94,10 @@ func TestCreateTableAndInsertSQL(t *testing.T) {
 func TestCreateTableAndInsertSQLFile(t *testing.T) {
 	setup()
 	cols := []model.Column{
-		model.Column{Name: "id", T: "id",},
-		model.Column{Name: "city", T: "string",},
-		model.Column{Name: "province", T: "string",},
-		model.Column{Name: "create_time", T: "datetime",},
+		model.Column{Name: "id", T: "id"},
+		model.Column{Name: "city", T: "string"},
+		model.Column{Name: "province", T: "string"},
+		model.Column{Name: "create_time", T: "datetime"},
 	}
 	tblName := "pen"
 	num := 100000
@@ -104,4 +105,27 @@ func TestCreateTableAndInsertSQLFile(t *testing.T) {
 	assert.Equal(t, nil, err)
 	// err = SourceSQL(tblName, num)
 	// assert.Equal(t, nil, err)
+}
+
+func TestGetNumPart(t *testing.T) {
+	inputs := []int{1, 10000, 1000000, 2000000, 4000001}
+	for _, input := range inputs {
+		parts := GetNumPart(input)
+		fmt.Println(input, parts)
+		assert.Equal(t, true, len(parts) > 0)
+	}
+}
+func TestWriteCSV(t *testing.T) {
+	setup()
+	cols := []model.Column{
+		model.Column{Name: "id", T: "id"},
+		model.Column{Name: "city", T: "string"},
+		model.Column{Name: "province", T: "string"},
+		model.Column{Name: "create_time", T: "datetime"},
+	}
+	makeColumn := MakeColumnFuncFactory(cols)
+	tblName := "pen"
+	num := 2000000
+	err := WriteCSV(tblName, num, makeColumn)
+	assert.Equal(t, nil, err)
 }
