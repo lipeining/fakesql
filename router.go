@@ -10,25 +10,26 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lipeining/fakesql/model"
 )
+
 // TableForm use to bind post /table form
 type TableForm struct {
-	TblName    string `form:"tblName" binding:"required"`
+	TblName string `form:"tblName" binding:"required"`
 	// JSONPath   string `json:"jsonPath" form:"jsonPath"`
-	Cols   string `form:"cols" binding:"required"`
-	Num        int    `form:"num" binding:"required"`
+	Cols string `form:"cols" binding:"required"`
+	Num  int    `form:"num" binding:"required"`
 }
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context){
+	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
 	// 2.绑定路由规则，执行的函数
 	// gin.Context，封装了request和response
-	r.GET("/", func(c *gin.Context){
+	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "home")
 	})
-	r.POST("/tables", func(c *gin.Context){
+	r.POST("/tables", func(c *gin.Context) {
 		// var tableForm TableForm
 		// if err := c.ShouldBind(&tableForm); err != nil {
 		// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

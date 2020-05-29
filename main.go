@@ -1,25 +1,26 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lipeining/fakesql/config"
 	"github.com/lipeining/fakesql/database"
 )
+
 var tblName string
 var num int
 var jsonPath string
 
 func init() {
-    const (
-        // defaultNum = 1000000
-        defaultNum = 10000
-    )
-    flag.StringVar(&tblName, "tblName", "user", "tblName")
-    flag.StringVar(&jsonPath, "jsonPath", "./tables/user.json", "jsonPath absolute or relative path")
-    flag.IntVar(&num, "num", defaultNum, "generate of num rows")
+	const (
+		// defaultNum = 1000000
+		defaultNum = 10000
+	)
+	flag.StringVar(&tblName, "tblName", "user", "tblName")
+	flag.StringVar(&jsonPath, "jsonPath", "./tables/user.json", "jsonPath absolute or relative path")
+	flag.IntVar(&num, "num", defaultNum, "generate of num rows")
 }
 func main() {
 	fmt.Println(config.Config)
